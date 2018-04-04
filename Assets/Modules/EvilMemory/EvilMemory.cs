@@ -9,7 +9,7 @@ public class EvilMemory : MonoBehaviour
     public static readonly string[] ignoredModules = {
         "Forget Me Not",     //Regular version.
         "Forget Everything", //Mandatory to prevent unsolvable bombs.
-        "Turn The Key",      //TTK is timer based, and stalls the bomb if only it and FMN are left.
+        "Turn The Key",      //TTK is timer based, and stalls the bomb if only it and FE are left.
         "Souvenir",          //Similar situation to TTK, stalls the bomb.
     };
 
@@ -166,7 +166,7 @@ public class EvilMemory : MonoBehaviour
                     }
                     string colName;
                     if(primaryCol == 0) {
-                        colName = "Red (add odd)";
+                        colName = "Red     (add odd)";
                         for(int b = 0; b < 10; b+=2) {
                             Solution[b] = (Solution[b] + DialDisplay[a][b]) % 10;
                         }
@@ -178,13 +178,13 @@ public class EvilMemory : MonoBehaviour
                         }
                     }
                     else if(primaryCol == 2) {
-                        colName = "Green (sub odd)";
+                        colName = "Green   (sub odd)";
                         for(int b = 0; b < 10; b+=2) {
                             Solution[b] = (Solution[b] - DialDisplay[a][b] + 10) % 10;
                         }
                     }
                     else {
-                        colName = "Blue (sub even)";
+                        colName = "Blue   (sub even)";
                         for(int b = 1; b < 10; b+=2) {
                             Solution[b] = (Solution[b] - DialDisplay[a][b] + 10) % 10;
                         }
@@ -195,7 +195,7 @@ public class EvilMemory : MonoBehaviour
                         ans += Solution[b];
                         disp += DialDisplay[a][b];
                     }
-                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage " + (a+1) + " is an important stage. Display: " + disp + ", Colour: " + colName + " (" + (colFromMissing ? "missing colour" : "most frequent") + "), New answer: " + ans);
+                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage " + (a+1).ToString("D2") + " is an important stage. Display: " + disp + ", Colour: " + colName + " " + (colFromMissing ? "(missing colour)" : " (most frequent)") + ", New answer: " + ans);
                 }
                 else {
                     if(stageCounter >= 0) stageCounter = -1;
