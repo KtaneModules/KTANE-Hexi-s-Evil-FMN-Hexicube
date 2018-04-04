@@ -1,16 +1,4 @@
-﻿/*
-
--- On the Subject of Forget Me Not --
-- This one likes attention, but not *too* much attention. -
-
-Complete a different module to unlock each stage.
-Each stage will provide a different letter.
-Using the rules below, change each letter to the appropriate number.
-Once all letters have been displayed, the display will go blank. Enter the correct numbers.
-
-*/
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
