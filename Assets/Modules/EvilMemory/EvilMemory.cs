@@ -209,7 +209,7 @@ public class EvilMemory : MonoBehaviour
         Debug.Log("[Forget Everything #"+thisLoggingID+"] Final answer: " + ans2);
     }
 
-    int ticker = 0, lastProgress = -1;
+    int ticker = 0, displayOverride = -1;
     bool done = false;
     void FixedUpdate()
     {
@@ -220,28 +220,28 @@ public class EvilMemory : MonoBehaviour
         {
             ticker = 0;
             int progress = BombInfo.GetSolvedModuleNames().Where(x => !ignoredModules.Contains(x)).Count();
-            if(progress != lastProgress) {
-                lastProgress = progress;
-                if(progress >= StageOrdering.Length) {
-                    //Ready to solve
-                    Text.text = "--";
-                    Nix1.SetValue(-1);
-                    Nix2.SetValue(-1);
-                    LED.materials[1].color = LED_OFF;
-                    LED.materials[2].color = LED_OFF;
-                    LED.materials[3].color = LED_OFF;
-                }
-                else {
-                    //Showing stages
-                    int stage = StageOrdering[progress];
-                    Text.text = (stage+1).ToString("D2");
-                    Nix1.SetValue(NixieDisplay[stage] / 10);
-                    Nix2.SetValue(NixieDisplay[stage] % 10);
-                    ShowNumber(DialDisplay[stage]);
-                    LED.materials[1].color = LED_COLS[LEDDisplay[stage][0]];
-                    LED.materials[2].color = LED_COLS[LEDDisplay[stage][1]];
-                    LED.materials[3].color = LED_COLS[LEDDisplay[stage][2]];
-                }
+            if(progress >= StageOrdering.Length && displayOverride == -1) {
+                //Ready to solve
+                Text.text = "--";
+                Nix1.SetValue(-1);
+                Nix2.SetValue(-1);
+                LED.materials[1].color = LED_OFF;
+                LED.materials[2].color = LED_OFF;
+                LED.materials[3].color = LED_OFF;
+            }
+            else {
+                //Showing stages
+                int stage;
+                if(displayOverride != -1) stage = displayOverride;
+                else stage = StageOrdering[progress];
+
+                Text.text = (stage+1).ToString("D2");
+                Nix1.SetValue(NixieDisplay[stage] / 10);
+                Nix2.SetValue(NixieDisplay[stage] % 10);
+                ShowNumber(DialDisplay[stage]);
+                LED.materials[1].color = LED_COLS[LEDDisplay[stage][0]];
+                LED.materials[2].color = LED_COLS[LEDDisplay[stage][1]];
+                LED.materials[3].color = LED_COLS[LEDDisplay[stage][2]];
             }
         }
     }
@@ -257,6 +257,7 @@ public class EvilMemory : MonoBehaviour
             return;
         }
 
+        displayOverride = -1;
         Dials[val].GetComponent<Dial>().Increment();
         Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, transform);
     }
@@ -295,7 +296,23 @@ public class EvilMemory : MonoBehaviour
             done = true;
         }
         else {
-            Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + ans);
+            int dispOver = -1;
+            bool wantsOver = true;
+            for(int a = 0; a < 8; a++) {
+                if(Dials[a].GetComponent<Dial>().GetValue() != 0) {
+                    wantsOver = false;
+                    break;
+                }
+            }
+            if(wantsOver) {
+                dispOver = Dials[8].GetComponent<Dial>().GetValue() * 10 + Dials[9].GetComponent<Dial>().GetValue();
+                if(dispOver == 0 || dispOver > StageOrdering.Length) Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + ans);
+                else {
+                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage display override in exchange for strike: Stage " + dispOver.ToString("D2"));
+                    displayOverride = dispOver-1;
+                }
+            }
+            else Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + ans);
             GetComponent<KMBombModule>().HandleStrike();
         }
 
