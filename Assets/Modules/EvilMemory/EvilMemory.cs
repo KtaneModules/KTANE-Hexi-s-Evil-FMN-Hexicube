@@ -168,29 +168,22 @@ public class EvilMemory : MonoBehaviour
                         else                                                                             primaryCol = 3;
                     }
                     string colName;
+                    int dial = a % 10;
                     if(primaryCol == 0) {
-                        colName = "Red     (add odd)";
-                        for(int b = 0; b < 10; b+=2) {
-                            Solution[b] = (Solution[b] + DialDisplay[a][b]) % 10;
-                        }
+                        colName = "Red    (a+b)";
+                        Solution[dial] = (Solution[dial] + DialDisplay[a][dial]) % 10;
                     }
                     else if(primaryCol == 1) {
-                        colName = "Yellow (add even)";
-                        for(int b = 1; b < 10; b+=2) {
-                            Solution[b] = (Solution[b] + DialDisplay[a][b]) % 10;
-                        }
+                        colName = "Yellow (a-b)";
+                        Solution[dial] = (Solution[dial] - DialDisplay[a][dial] + 10) % 10;
                     }
                     else if(primaryCol == 2) {
-                        colName = "Green   (sub odd)";
-                        for(int b = 0; b < 10; b+=2) {
-                            Solution[b] = (Solution[b] - DialDisplay[a][b] + 10) % 10;
-                        }
+                        colName = "Green(a+b+5)";
+                        Solution[dial] = (Solution[dial] + DialDisplay[a][dial] + 5) % 10;
                     }
                     else {
-                        colName = "Blue   (sub even)";
-                        for(int b = 1; b < 10; b+=2) {
-                            Solution[b] = (Solution[b] - DialDisplay[a][b] + 10) % 10;
-                        }
+                        colName = "Blue   (b-a)";
+                        Solution[dial] = (DialDisplay[a][dial] - Solution[dial] + 10) % 10;
                     }
 
                     string ans = "", disp = "";
