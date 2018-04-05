@@ -248,7 +248,7 @@ public class EvilMemory : MonoBehaviour
 
     private void Handle(int val) {
         Dials[val].GetComponent<KMSelectable>().AddInteractionPunch(0.1f);
-        if(done) return;
+        if(done || StageOrdering == null) return;
 
         int progress = BombInfo.GetSolvedModuleNames().Where(x => !ignoredModules.Contains(x)).Count();
         if(progress < StageOrdering.Length) {
@@ -264,7 +264,7 @@ public class EvilMemory : MonoBehaviour
 
     private bool HandleSubmit() {
         Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.5f);
-        if(done) return false;
+        if(done || StageOrdering == null) return false;
 
         int progress = BombInfo.GetSolvedModuleNames().Where(x => !ignoredModules.Contains(x)).Count();
         if(progress < StageOrdering.Length) {
