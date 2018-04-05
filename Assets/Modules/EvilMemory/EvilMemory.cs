@@ -9,6 +9,9 @@ public class EvilMemory : MonoBehaviour
     //How intense should stages be shuffled? 1 is no shuffle, 99 is full shuffle.
     private const int STAGE_RANDOM_FACTOR = 10;
 
+    //Delay between stages displaying
+    private const float STAGE_DELAY = 4;
+
     public static readonly string[] ignoredModules = {
         "Forget Me Not",     //Regular version.
         "Forget Everything", //Mandatory to prevent unsolvable bombs.
@@ -207,15 +210,26 @@ public class EvilMemory : MonoBehaviour
 
     int ticker = 0, displayOverride = -1;
     bool done = false;
+
+    int displayCurStage = 0;
+    float displayTimer = 3;
     void FixedUpdate()
     {
         if(done || StageOrdering == null) return;
+        if(displayTimer > 0) displayTimer -= Time.fixedDeltaTime;
 
         ticker++;
         if(ticker == 15)
         {
             ticker = 0;
             int progress = BombInfo.GetSolvedModuleNames().Where(x => !ignoredModules.Contains(x)).Count();
+            if(progress > displayCurStage) {
+                if(displayTimer <= 0) {
+                    displayTimer = STAGE_DELAY;
+                    displayCurStage++;
+                }
+                progress = displayCurStage;
+            }
             if(progress >= StageOrdering.Length && displayOverride == -1) {
                 //Ready to solve
                 Text.text = "--";
