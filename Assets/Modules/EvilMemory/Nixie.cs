@@ -16,6 +16,7 @@ public class Nixie : MonoBehaviour
             Bars[a] = t.Find("Bar").gameObject;
             Glows[a] = t.Find("Glow").gameObject;
             Glows[a].SetActive(false);
+            Bars[a].SetActive(false);
 
             Bars[a].GetComponent<MeshRenderer>().material.color = new Color(0.2f, 0.2f, 0.2f);
             Glows[a].GetComponent<MeshRenderer>().material.color = new Color(1, 0.4f, 0, 1);
@@ -29,12 +30,12 @@ public class Nixie : MonoBehaviour
         if(v == val) return;
         
         if(val != -1) {
-            Bars[val].SetActive(true);
+            //Bars[val].SetActive(true);
             Glows[val].SetActive(false);
         }
         val = v;
         if (val != -1) {
-            Bars[val].SetActive(false);
+            //Bars[val].SetActive(false);
             Glows[val].SetActive(true);
         }
     }
