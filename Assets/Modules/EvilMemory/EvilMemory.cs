@@ -39,8 +39,6 @@ public class EvilMemory : MonoBehaviour
     private int[]  NixieDisplay;
     private int[][]  LEDDisplay;
 
-    private bool forcedSolve = false;
-
     void Awake()
     {
         thisLoggingID = loggingID++;
@@ -82,6 +80,8 @@ public class EvilMemory : MonoBehaviour
         if(count == 0) { //Prevent deadlock
             Debug.Log("[Forget Everything #"+thisLoggingID+"] No valid stage modules, auto-solving.");
             GetComponent<KMBombModule>().HandlePass();
+            ShowNumber(new int[]{0,1,2,3,4,5,6,7,8,9});
+            done = true;
             return;
         }
         if(count > 99) { //More than 99 stages will cause issues as the stage display only has 2 digits
@@ -213,7 +213,7 @@ public class EvilMemory : MonoBehaviour
     bool done = false;
     void FixedUpdate()
     {
-        if(forcedSolve || done || StageOrdering == null) return;
+        if(done || StageOrdering == null) return;
 
         ticker++;
         if(ticker == 15)
