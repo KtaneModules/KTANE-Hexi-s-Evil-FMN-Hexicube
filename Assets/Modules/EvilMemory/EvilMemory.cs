@@ -280,7 +280,6 @@ public class EvilMemory : MonoBehaviour
             if(dial == -1) {
                 Debug.Log("[Forget Everything #"+thisLoggingID+"] Tried to submit whilst dials are spinning.");
                 GetComponent<KMBombModule>().HandleStrike();
-                Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
                 return false;
             }
 
@@ -323,5 +322,66 @@ public class EvilMemory : MonoBehaviour
         for(int a = 0; a < 10; a++) {
             Dials[a].GetComponent<Dial>().Move(nums[a]);
         }
+    }
+
+    //Twitch Plays support
+
+    #pragma warning disable 0414
+    string TwitchHelpMessage = "Submit answers with 'submit 1234567890'. Re-show stage info with 'submit 12' or 'submit 0000000012'.";
+    #pragma warning restore 0414
+
+    public void TwitchHandleForcedSolve() {
+        Debug.Log("[Forget Everything #"+thisLoggingID+"] Module forcibly solved.");
+        ShowNumber(Solution);
+        Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.5f);
+        Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+        GetComponent<KMBombModule>().HandlePass();
+        done = true;
+    }
+
+    public IEnumerator ProcessTwitchCommand(string cmd) {
+        cmd = cmd.ToLowerInvariant();
+        if(cmd.StartsWith("press ") || cmd.StartsWith("submit ")) {
+            cmd = cmd.Substring(cmd.IndexOf(' ')+1);
+            if(cmd.Length == 10) {
+                int[] values = new int[10];
+                for(int a = 0; a < 10; a++) {
+                    int v = cmd[a] - '0';
+                    if(v < 0 || v > 9) {
+                        yield return "sendtochaterror Unknown character: " + cmd[a];
+                        yield break;
+                    }
+                    values[a] = v;
+                }
+
+                yield return "Forget Everything";
+                ShowNumber(values);
+                for(int a = 0; a < 10; a++) {
+                    while(Dials[a].GetComponent<Dial>().GetValue() == -1) yield return new WaitForSeconds(0.1f);
+                }
+                HandleSubmit();
+                yield break;
+            }
+            if(cmd.Length == 2) {
+                int stage = 0;
+                bool valid = int.TryParse(cmd, out stage);
+                if(!valid || stage < 1 || stage > StageOrdering.Length) {
+                    yield return "sendtochaterror Bad stage: " + cmd + ", stage number must be between 1 and " + StageOrdering.Length + " inclusive.";
+                    yield break;
+                }
+
+                yield return "Forget Everything";
+                ShowNumber(new int[]{0,0,0,0,0,0,0,0,stage/10,stage%10});
+                for(int a = 0; a < 10; a++) {
+                    while(Dials[a].GetComponent<Dial>().GetValue() == -1) yield return new WaitForSeconds(0.1f);
+                }
+                HandleSubmit();
+                yield break;
+            }
+            yield return "sendtochaterror Answers need either 2 or 10 digits.";
+            yield break;
+        }
+        yield return "sendtochaterror Commands must start with 'submit'.";
+        yield break;
     }
 }
