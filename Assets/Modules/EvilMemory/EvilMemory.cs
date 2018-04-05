@@ -6,6 +6,9 @@ using System.Linq;
 
 public class EvilMemory : MonoBehaviour
 {
+    //How intense should stages be shuffled? 1 is no shuffle, 99 is full shuffle.
+    private const int STAGE_RANDOM_FACTOR = 10;
+
     public static readonly string[] ignoredModules = {
         "Forget Me Not",     //Regular version.
         "Forget Everything", //Mandatory to prevent unsolvable bombs.
@@ -103,7 +106,7 @@ public class EvilMemory : MonoBehaviour
         int opCount = 0;
         int stageCounter = 1;
         for(int a = 0; a < count; a++) {
-            int p = Random.Range(0, stages.Count);
+            int p = Random.Range(0, Mathf.Min(stages.Count, STAGE_RANDOM_FACTOR));
             StageOrdering[a] = stages[p];
             stages.RemoveAt(p);
 
