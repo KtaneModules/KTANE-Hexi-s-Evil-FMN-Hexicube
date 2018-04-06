@@ -221,9 +221,27 @@ public class EvilMemory : MonoBehaviour
     bool done = false;
 
     int displayCurStage = 0;
-    float displayTimer = 3;
+    const float PER_LED_TIME = 0.1f;
+    float displayTimer = 3, flourishTimer = PER_LED_TIME * 10;
     void FixedUpdate()
     {
+        if(done) {
+            flourishTimer = (flourishTimer + Time.fixedDeltaTime) % (PER_LED_TIME * 20);
+            if(flourishTimer >= PER_LED_TIME * 10) {
+                float time = flourishTimer - PER_LED_TIME * 10;
+                for(int a = 0; a < 10; a++) {
+                    if(time >= PER_LED_TIME * a) DialLED[a].material.color = LED_OFF;
+                    else DialLED[a].material.color = LED_COLS[2];
+                }
+            }
+            else {
+                for(int a = 0; a < 10; a++) {
+                    if(flourishTimer >= PER_LED_TIME * a) DialLED[a].material.color = LED_COLS[2];
+                    else DialLED[a].material.color = LED_OFF;
+                }
+            }
+        }
+
         if(done || StageOrdering == null) return;
         if(displayTimer > 0) displayTimer -= Time.fixedDeltaTime;
 
