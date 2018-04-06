@@ -6,6 +6,9 @@ using System.Linq;
 
 public class EvilMemory : MonoBehaviour
 {
+    //Debug variables
+    private const int EXTRA_STAGES = 0;
+
     //How intense should stages be shuffled? 1 is no shuffle, 99 is full shuffle.
     private const int STAGE_RANDOM_FACTOR = 10;
 
@@ -33,6 +36,7 @@ public class EvilMemory : MonoBehaviour
 
     public GameObject DialContainer;
     private GameObject[] Dials;
+    private MeshRenderer[] DialLED;
     public KMSelectable Submit;
     public TextMesh Text;
     public Nixie Nix1, Nix2;
@@ -52,7 +56,12 @@ public class EvilMemory : MonoBehaviour
         transform.Find("Background").GetComponent<MeshRenderer>().material.color = new Color(0.3f, 0.3f, 0.3f);
 
         Dials = new GameObject[10];
-        for(int a = 0; a < 10; a++) Dials[a] = DialContainer.transform.Find("Dial " + (a+1)).gameObject;
+        DialLED = new MeshRenderer[10];
+        for(int a = 0; a < 10; a++) {
+            Dials[a] = DialContainer.transform.Find("Dial " + (a+1)).gameObject;
+            DialLED[a] = DialContainer.transform.Find("Dial LED " + (a+1)).GetComponent<MeshRenderer>();
+            DialLED[a].material.color = LED_OFF;
+        }
 
         MeshRenderer mr = transform.Find("Display").Find("Wiring").GetComponent<MeshRenderer>();
         mr.materials[0].color = new Color(0.1f, 0.1f, 0.1f);
@@ -82,7 +91,7 @@ public class EvilMemory : MonoBehaviour
 
     private void ActivateModule()
     {
-        int count = BombInfo.GetSolvableModuleNames().Where(x => !ignoredModules.Contains(x)).Count();
+        int count = BombInfo.GetSolvableModuleNames().Where(x => !ignoredModules.Contains(x)).Count() + EXTRA_STAGES;
         if(count == 0) { //Prevent deadlock
             Debug.Log("[Forget Everything #"+thisLoggingID+"] No valid stage modules, auto-solving.");
             GetComponent<KMBombModule>().HandlePass();
@@ -222,7 +231,7 @@ public class EvilMemory : MonoBehaviour
         if(ticker == 15)
         {
             ticker = 0;
-            int progress = BombInfo.GetSolvedModuleNames().Where(x => !ignoredModules.Contains(x)).Count();
+            int progress = BombInfo.GetSolvedModuleNames().Where(x => !ignoredModules.Contains(x)).Count() + EXTRA_STAGES;
             if(progress > displayCurStage) {
                 if(displayTimer <= 0) {
                     displayTimer = STAGE_DELAY;
@@ -258,10 +267,10 @@ public class EvilMemory : MonoBehaviour
 
     private void Handle(int val) {
         Dials[val].GetComponent<KMSelectable>().AddInteractionPunch(0.1f);
-        if(done || StageOrdering == null) return;
+        Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, transform);
+        if(done || StageOrdering == null || doingSolve) return;
 
-        int progress = BombInfo.GetSolvedModuleNames().Where(x => !ignoredModules.Contains(x)).Count();
-        if(progress < StageOrdering.Length) {
+        if(displayCurStage < StageOrdering.Length) {
             Debug.Log("[Forget Everything #"+thisLoggingID+"] Tried to turn a dial too early.");
             GetComponent<KMBombModule>().HandleStrike();
             return;
@@ -269,39 +278,63 @@ public class EvilMemory : MonoBehaviour
 
         displayOverride = -1;
         Dials[val].GetComponent<Dial>().Increment();
-        Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, transform);
     }
 
     private bool HandleSubmit() {
         Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.5f);
-        if(done || StageOrdering == null) return false;
+        Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+        if(done || StageOrdering == null || doingSolve) return false;
 
-        int progress = BombInfo.GetSolvedModuleNames().Where(x => !ignoredModules.Contains(x)).Count();
-        if(progress < StageOrdering.Length) {
+        if(displayCurStage < StageOrdering.Length) {
             Debug.Log("[Forget Everything #"+thisLoggingID+"] Tried to submit an answer too early.");
             GetComponent<KMBombModule>().HandleStrike();
             return false;
         }
 
-        bool correct = true;
-        string ans = "";
         for(int a = 0; a < 10; a++) {
-            int dial = Dials[a].GetComponent<Dial>().GetValue();
-            if(dial == -1) {
+            if(Dials[a].GetComponent<Dial>().GetValue() == -1) {
                 Debug.Log("[Forget Everything #"+thisLoggingID+"] Tried to submit whilst dials are spinning.");
                 GetComponent<KMBombModule>().HandleStrike();
                 return false;
             }
+        }
 
-            ans += dial;
-            if(dial != Solution[a]) correct = false;
+        Submit.transform.localRotation = Quaternion.Euler(0, 115, 0);
+
+        doingSolve = true;
+        StartCoroutine(SolveAnim());
+
+        return false;
+    }
+
+    private bool doingSolve = false;
+    private IEnumerator SolveAnim() {
+        List<int> slots = new List<int>();
+        for(int a = 0; a < 10; a++) slots.Add(a);
+
+        bool correct = true;
+        string[] ans = new string[10];
+        while(slots.Count > 0) {
+            yield return new WaitForSeconds(0.5f);
+            int p = Random.Range(0, slots.Count);
+            int slot = slots[p];
+            slots.RemoveAt(p);
+
+            int val = Dials[slot].GetComponent<Dial>().GetValue();
+            ans[slot] = ""+val;
+            if(val == Solution[slot]) {
+                DialLED[slot].material.color = LED_COLS[2]; //green
+            }
+            else {
+                correct = false;
+                DialLED[slot].material.color = LED_COLS[0]; //red
+            }
         }
 
         if(correct) {
             Debug.Log("[Forget Everything #"+thisLoggingID+"] Module solved.");
             GetComponent<KMBombModule>().HandlePass();
             Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
-            Submit.transform.localRotation = Quaternion.Euler(0, 115, 0);
             done = true;
         }
         else {
@@ -315,17 +348,22 @@ public class EvilMemory : MonoBehaviour
             }
             if(wantsOver) {
                 dispOver = Dials[8].GetComponent<Dial>().GetValue() * 10 + Dials[9].GetComponent<Dial>().GetValue();
-                if(dispOver == 0 || dispOver > StageOrdering.Length) Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + ans);
+                if(dispOver == 0 || dispOver > StageOrdering.Length) Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + string.Join("", ans));
                 else {
                     Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage display override in exchange for strike: Stage " + dispOver.ToString("D2"));
                     displayOverride = dispOver-1;
                 }
             }
-            else Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + ans);
+            else Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + string.Join("", ans));
             GetComponent<KMBombModule>().HandleStrike();
+            Submit.transform.localRotation = Quaternion.Euler(0, 90, 0);
+            Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.25f);
+
+            yield return new WaitForSeconds(2);
+            for(int a = 0; a < 10; a++) DialLED[a].material.color = LED_OFF;
         }
 
-        return false;
+        doingSolve = false;
     }
 
     private void ShowNumber(int[] nums) {
