@@ -33,7 +33,7 @@ public class Dial : MonoBehaviour
     public int GetValue() {
         float t = targ * 36 + 90;
         float diff = pos - t;
-        if(diff > 0.1f) return -1; //Dial is not ready
+        if(diff != 0) return -1; //Dial is not ready
 
         return targ;
     }
