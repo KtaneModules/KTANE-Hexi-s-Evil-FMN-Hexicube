@@ -61,6 +61,16 @@ public class EvilMemory : MonoBehaviour
             Dials[a] = DialContainer.transform.Find("Dial " + (a+1)).gameObject;
             DialLED[a] = DialContainer.transform.Find("Dial LED " + (a+1)).GetComponent<MeshRenderer>();
             DialLED[a].material.color = LED_OFF;
+
+            int a2 = a;
+            DialContainer.transform.Find("Dial " + (a+1) + " Increment").GetComponent<KMSelectable>().OnInteract += delegate() {
+                Handle(a2, true);
+                return false;
+            };
+            DialContainer.transform.Find("Dial " + (a+1) + " Decrement").GetComponent<KMSelectable>().OnInteract += delegate() {
+                Handle(a2, false);
+                return false;
+            };
         }
 
         MeshRenderer mr = transform.Find("Display").Find("Wiring").GetComponent<MeshRenderer>();
@@ -78,15 +88,10 @@ public class EvilMemory : MonoBehaviour
         DialContainer.transform.Find("Base").GetComponent<MeshRenderer>().material.color = new Color(0.3f, 0.3f, 0.3f);
         Submit.GetComponent<MeshRenderer>().material.color = new Color(0.8f, 0.8f, 0.2f);
 
-        for(int a = 0; a < Dials.Length; a++) {
-            int a2 = a;
-            Dials[a].GetComponent<KMSelectable>().OnInteract += delegate() {Handle(a2); return false;};
-        }
-        Submit.OnInteract += HandleSubmit;
+        Text.text = "";
 
         GetComponent<KMBombModule>().OnActivate += ActivateModule;
-
-        Text.text = "";
+        Submit.OnInteract += HandleSubmit;
     }
 
     private void ActivateModule()
@@ -283,8 +288,8 @@ public class EvilMemory : MonoBehaviour
         }
     }
 
-    private void Handle(int val) {
-        Dials[val].GetComponent<KMSelectable>().AddInteractionPunch(0.1f);
+    private void Handle(int val, bool increment) {
+        Submit.AddInteractionPunch(0.1f);
         Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, transform);
         if(done || StageOrdering == null || doingSolve) return;
 
@@ -295,7 +300,8 @@ public class EvilMemory : MonoBehaviour
         }
 
         displayOverride = -1;
-        Dials[val].GetComponent<Dial>().Increment();
+        if(increment) Dials[val].GetComponent<Dial>().Increment();
+        else          Dials[val].GetComponent<Dial>().Decrement();
     }
 
     private bool HandleSubmit() {

@@ -9,13 +9,22 @@ public class Dial : MonoBehaviour
     {
         float t = targ * 36 + 90;
         float diff = pos - t;
-        if (diff < 0) diff += 360;
+        if(diff <= -180) diff += 360; if(diff > 180) diff -= 360;
 
         float move = Time.deltaTime * 36 * 5; //takes 0.2s
-        if (move > diff) pos = t;
+        if(diff < 0) {
+            if(-move < diff) pos = t;
+            else {
+                pos += move;
+                if(pos >= 360) pos -= 360;
+            }
+        }
         else {
-            pos -= move;
-            if (pos < 0) pos += 360;
+            if(move > diff) pos = t;
+            else {
+                pos -= move;
+                if (pos < 0) pos += 360;
+            }
         }
 
         transform.localRotation = Quaternion.Euler(new Vector3(0, 0, pos));
@@ -25,9 +34,12 @@ public class Dial : MonoBehaviour
         targ = target;
     }
 
-    public void Increment() {
-        //Actually decrements, due to the way the dial spins.
+    public void Decrement() {
         Move((targ + 9) % 10);
+    }
+
+    public void Increment() {
+        Move((targ + 1) % 10);
     }
 
     public int GetValue() {
