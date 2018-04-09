@@ -7,9 +7,12 @@ using System.Linq;
 public class EvilMemory : MonoBehaviour
 {
     //Debug variables
-    private const int EXTRA_STAGES = 1;
+    private const int EXTRA_STAGES = 0;
 
     //How intense should stages be shuffled? 1 is no shuffle, 99 is full shuffle.
+    //This is implemented as "how many stages can I pick from?". For stage N, it can pick any missing stage from 1 to N+k-1.
+    //For low module counts, this is effectively random. For high module counts, this should encourage earlier stages to show first.
+    //The first stage can still show last, but it's extremely improbable.
     private const int STAGE_RANDOM_FACTOR = 10;
 
     //Delay between stages displaying
@@ -133,7 +136,7 @@ public class EvilMemory : MonoBehaviour
 
         Solution = new int[10];
 
-        int opCount = 0;
+        int opCount = 1;
         int stageCounter = 1;
         for(int a = 0; a < count; a++) {
             int p = Random.Range(0, Mathf.Min(stages.Count, STAGE_RANDOM_FACTOR));
@@ -404,7 +407,45 @@ public class EvilMemory : MonoBehaviour
                     displayOverride = dispOver-1;
                 }
             }
-            else Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + string.Join("", ans));
+            else {
+                //If you've noticed this, keep it a secret.
+                //Yes, that means you, Mr. Repository Examiner!
+
+                string str = BombInfo.GetFormattedTime().Replace(":", "");
+                wantsOver = true;
+                for(int a = 0; a < 10; a++) {
+                    if(a < str.Length) {
+                        if(Dials[a].GetComponent<Dial>().GetValue() != str[a] - '0') {
+                            wantsOver = false;
+                            break;
+                        }
+                    }
+                    else if(Dials[a].GetComponent<Dial>().GetValue() != 0) {
+                        wantsOver = false;
+                        break;
+                    }
+                }
+                
+                if(wantsOver) {
+                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Has someone been poking around in the repository?");
+                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Showing all states in order...hope you can write it down quickly!");
+
+                    //Remove order shuffle
+                    for(int a = 0; a < StageOrdering.Length; a++) StageOrdering[a] = a;
+
+                    //Reset display
+                    displayCurStage = 0;
+                    displayTimer = 3;
+
+                    //Avoid strike, because it's a secret...
+                    doingSolve = false;
+                    for(int a = 0; a < 10; a++) DialLED[a].material.color = LED_OFF;
+                    Submit.transform.localRotation = Quaternion.Euler(0, 90, 0);
+                    Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.25f);
+                    yield break;
+                }
+                else Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + string.Join("", ans));
+            }
             GetComponent<KMBombModule>().HandleStrike();
             Submit.transform.localRotation = Quaternion.Euler(0, 90, 0);
             Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.25f);
