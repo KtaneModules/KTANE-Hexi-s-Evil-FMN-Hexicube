@@ -7,13 +7,16 @@ using System.Linq;
 public class EvilMemory : MonoBehaviour
 {
     //Debug variables
-    private const int EXTRA_STAGES = 0;
+    private const int EXTRA_STAGES = 1;
 
     //How intense should stages be shuffled? 1 is no shuffle, 99 is full shuffle.
     private const int STAGE_RANDOM_FACTOR = 10;
 
     //Delay between stages displaying
-    private const float STAGE_DELAY = 4;
+    private const float STAGE_DELAY = 3;
+
+    //Toggle for flipping dial controls
+    private const bool FLIP_DIAL_BUTTONS = false;
 
     public static readonly string[] ignoredModules = {
         "Forget Me Not",     //Regular version.
@@ -63,11 +66,21 @@ public class EvilMemory : MonoBehaviour
             DialLED[a].material.color = LED_OFF;
 
             int a2 = a;
-            DialContainer.transform.Find("Dial " + (a+1) + " Increment").GetComponent<KMSelectable>().OnInteract += delegate() {
+            Transform o = DialContainer.transform.Find("Dial " + (a+1) + " Increment");
+            if(FLIP_DIAL_BUTTONS) {
+                o.localPosition = new Vector3(-o.localPosition.x, o.localPosition.y, o.localPosition.z);
+                o.localEulerAngles = new Vector3(-o.localEulerAngles.x, o.localEulerAngles.y, o.localEulerAngles.z);
+            }
+            o.GetComponent<KMSelectable>().OnInteract += delegate() {
                 Handle(a2, true);
                 return false;
             };
-            DialContainer.transform.Find("Dial " + (a+1) + " Decrement").GetComponent<KMSelectable>().OnInteract += delegate() {
+            o = DialContainer.transform.Find("Dial " + (a+1) + " Decrement");
+            if(FLIP_DIAL_BUTTONS) {
+                o.localPosition = new Vector3(-o.localPosition.x, o.localPosition.y, o.localPosition.z);
+                o.localEulerAngles = new Vector3(-o.localEulerAngles.x, o.localEulerAngles.y, o.localEulerAngles.z);
+            }
+            o.GetComponent<KMSelectable>().OnInteract += delegate() {
                 Handle(a2, false);
                 return false;
             };
@@ -292,13 +305,18 @@ public class EvilMemory : MonoBehaviour
         Submit.AddInteractionPunch(0.1f);
         Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, transform);
         if(done || StageOrdering == null || doingSolve) return;
-
+        
+        if(LEDactive) {
+            for(int a = 0; a < 10; a++) DialLED[a].material.color = LED_OFF;
+            LEDactive = false;
+        }
+        
         if(displayCurStage < StageOrdering.Length) {
             Debug.Log("[Forget Everything #"+thisLoggingID+"] Tried to turn a dial too early.");
             GetComponent<KMBombModule>().HandleStrike();
             return;
         }
-
+        
         displayOverride = -1;
         if(increment) Dials[val].GetComponent<Dial>().Increment();
         else          Dials[val].GetComponent<Dial>().Decrement();
@@ -308,6 +326,11 @@ public class EvilMemory : MonoBehaviour
         Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.5f);
         Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         if(done || StageOrdering == null || doingSolve) return false;
+        
+        if(LEDactive) {
+            for(int a = 0; a < 10; a++) DialLED[a].material.color = LED_OFF;
+            LEDactive = false;
+        }
 
         if(displayCurStage < StageOrdering.Length) {
             Debug.Log("[Forget Everything #"+thisLoggingID+"] Tried to submit an answer too early.");
@@ -331,7 +354,7 @@ public class EvilMemory : MonoBehaviour
         return false;
     }
 
-    private bool doingSolve = false;
+    private bool doingSolve = false, LEDactive = false;
     private IEnumerator SolveAnim() {
         List<int> slots = new List<int>();
         for(int a = 0; a < 10; a++) slots.Add(a);
@@ -339,8 +362,9 @@ public class EvilMemory : MonoBehaviour
         bool correct = true;
         string[] ans = new string[10];
         while(slots.Count > 0) {
-            yield return new WaitForSeconds(0.5f);
-            int p = Random.Range(0, slots.Count);
+            yield return new WaitForSeconds(PER_LED_TIME);
+            //int p = Random.Range(0, slots.Count);
+            int p = 0;
             int slot = slots[p];
             slots.RemoveAt(p);
 
@@ -359,6 +383,8 @@ public class EvilMemory : MonoBehaviour
             Debug.Log("[Forget Everything #"+thisLoggingID+"] Module solved.");
             GetComponent<KMBombModule>().HandlePass();
             Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+            Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.25f);
+            Submit.transform.localRotation = Quaternion.Euler(0, 140, 0);
             done = true;
         }
         else {
@@ -382,9 +408,7 @@ public class EvilMemory : MonoBehaviour
             GetComponent<KMBombModule>().HandleStrike();
             Submit.transform.localRotation = Quaternion.Euler(0, 90, 0);
             Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.25f);
-
-            yield return new WaitForSeconds(2);
-            for(int a = 0; a < 10; a++) DialLED[a].material.color = LED_OFF;
+            LEDactive = true;
         }
 
         doingSolve = false;
@@ -406,6 +430,7 @@ public class EvilMemory : MonoBehaviour
         Debug.Log("[Forget Everything #"+thisLoggingID+"] Module forcibly solved.");
         ShowNumber(Solution);
         Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.5f);
+        Submit.transform.localRotation = Quaternion.Euler(0, 140, 0);
         Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         GetComponent<KMBombModule>().HandlePass();
         done = true;
