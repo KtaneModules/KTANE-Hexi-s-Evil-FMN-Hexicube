@@ -8,6 +8,7 @@ public class EvilMemory : MonoBehaviour
 {
     //Debug variables
     private const int EXTRA_STAGES = 0;
+    private const bool PLAYTEST_MODE = false;
 
     //How intense should stages be shuffled? 1 is no shuffle, 99 is full shuffle.
     //This is implemented as "how many stages can I pick from?". For stage N, it can pick any missing stage from 1 to N+k-1.
@@ -272,7 +273,7 @@ public class EvilMemory : MonoBehaviour
             ticker = 0;
             int progress = BombInfo.GetSolvedModuleNames().Where(x => !ignoredModules.Contains(x)).Count() + EXTRA_STAGES;
             if(progress > displayCurStage) {
-                if(displayTimer <= 0) {
+                if(!PLAYTEST_MODE && displayTimer <= 0) {
                     displayTimer = STAGE_DELAY;
                     displayCurStage++;
                 }
@@ -329,6 +330,14 @@ public class EvilMemory : MonoBehaviour
         Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.5f);
         Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         if(done || StageOrdering == null || doingSolve) return false;
+
+        if(PLAYTEST_MODE) {
+            int progress = BombInfo.GetSolvedModuleNames().Where(x => !ignoredModules.Contains(x)).Count() + EXTRA_STAGES;
+            if(displayCurStage < progress) {
+                displayCurStage++;
+                return false;
+            }
+        }
         
         if(LEDactive) {
             for(int a = 0; a < 10; a++) DialLED[a].material.color = LED_OFF;
