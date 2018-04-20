@@ -7,8 +7,8 @@ using System.Linq;
 public class EvilMemory : MonoBehaviour
 {
     //Debug variables
-    private const int EXTRA_STAGES = 3;
-    private const bool PLAYTEST_MODE = true;
+    private const int EXTRA_STAGES = 0;
+    private const bool PLAYTEST_MODE = false;
 
     //How intense should stages be shuffled? 1 is no shuffle, 99 is full shuffle.
     //This is implemented as "how many stages can I pick from?". For stage N, it can pick any missing stage from 1 to N+k-1.
