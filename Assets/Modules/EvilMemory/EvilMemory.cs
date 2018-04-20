@@ -7,8 +7,8 @@ using System.Linq;
 public class EvilMemory : MonoBehaviour
 {
     //Debug variables
-    private const int EXTRA_STAGES = 0;
-    private const bool PLAYTEST_MODE = false;
+    private const int EXTRA_STAGES = 3;
+    private const bool PLAYTEST_MODE = true;
 
     //How intense should stages be shuffled? 1 is no shuffle, 99 is full shuffle.
     //This is implemented as "how many stages can I pick from?". For stage N, it can pick any missing stage from 1 to N+k-1.
@@ -22,6 +22,9 @@ public class EvilMemory : MonoBehaviour
     //Toggle for flipping dial controls
     private const bool FLIP_DIAL_BUTTONS = false;
 
+    //How many unique colours to create for the flashing "free stage check" LED
+    private const int STAGE_CHECK_FIDELITY = 25;
+
     public static readonly string[] ignoredModules = {
         "Forget Me Not",     //Regular version.
         "Forget Everything", //Mandatory to prevent unsolvable bombs.
@@ -34,6 +37,7 @@ public class EvilMemory : MonoBehaviour
                                                   new Color(0.5f, 0.5f, 0, 1),
                                                   new Color(0,    0.6f, 0, 1),
                                                   new Color(0,    0.3f, 1, 1)};
+    private static Color[] LED_INTENSITY;
 
     public static int loggingID = 1;
     public int thisLoggingID;
@@ -47,6 +51,7 @@ public class EvilMemory : MonoBehaviour
     public KMSelectable Submit;
     public TextMesh Text;
     public Nixie Nix1, Nix2;
+    public MeshRenderer FreeCheckLED;
     private MeshRenderer LED;
 
     private int[] StageOrdering;
@@ -58,6 +63,11 @@ public class EvilMemory : MonoBehaviour
 
     void Awake()
     {
+        if(LED_INTENSITY == null) {
+            LED_INTENSITY = new Color[STAGE_CHECK_FIDELITY];
+            for(int a = 0; a < STAGE_CHECK_FIDELITY; a++) LED_INTENSITY[a] = LED_COLS[0] * (STAGE_CHECK_FIDELITY-a) / STAGE_CHECK_FIDELITY;
+        }
+
         thisLoggingID = loggingID++;
         
         transform.Find("Background").GetComponent<MeshRenderer>().material.color = new Color(0.3f, 0.3f, 0.3f);
@@ -245,8 +255,12 @@ public class EvilMemory : MonoBehaviour
     int displayCurStage = 0;
     const float PER_LED_TIME = 0.1f;
     float displayTimer = 3, flourishTimer = PER_LED_TIME * 10;
+    bool freeCheckActive = false;
     void FixedUpdate()
     {
+        if(freeCheckActive) FreeCheckLED.material.color = LED_INTENSITY[STAGE_CHECK_FIDELITY-(int)(BombInfo.GetTime()*STAGE_CHECK_FIDELITY)%STAGE_CHECK_FIDELITY-1];
+        else FreeCheckLED.material.color = LED_OFF;
+
         if(done) {
             flourishTimer = (flourishTimer + Time.fixedDeltaTime) % (PER_LED_TIME * 20);
             if(flourishTimer >= PER_LED_TIME * 10) {
@@ -327,6 +341,8 @@ public class EvilMemory : MonoBehaviour
     }
 
     private bool HandleSubmit() {
+        displayOverride = -1;
+
         Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.5f);
         Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
         if(done || StageOrdering == null || doingSolve) return false;
@@ -394,7 +410,7 @@ public class EvilMemory : MonoBehaviour
         if(correct) {
             Debug.Log("[Forget Everything #"+thisLoggingID+"] Module solved.");
             GetComponent<KMBombModule>().HandlePass();
-            Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+            Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, transform);
             Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.25f);
             Submit.transform.localRotation = Quaternion.Euler(0, 140, 0);
             done = true;
@@ -410,7 +426,11 @@ public class EvilMemory : MonoBehaviour
             }
             if(wantsOver) {
                 dispOver = Dials[8].GetComponent<Dial>().GetValue() * 10 + Dials[9].GetComponent<Dial>().GetValue();
-                if(dispOver == 0 || dispOver > StageOrdering.Length) Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + string.Join("", ans));
+                if(dispOver == 0 || dispOver > StageOrdering.Length) {
+                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + string.Join("", ans));
+                    if(!freeCheckActive) Debug.Log("[Forget Everything #"+thisLoggingID+"] Free check added.");
+                    freeCheckActive = true;
+                }
                 else {
                     Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage display override in exchange for strike: Stage " + dispOver.ToString("D2"));
                     displayOverride = dispOver-1;
@@ -451,11 +471,22 @@ public class EvilMemory : MonoBehaviour
                     for(int a = 0; a < 10; a++) DialLED[a].material.color = LED_OFF;
                     Submit.transform.localRotation = Quaternion.Euler(0, 90, 0);
                     Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.25f);
+                    Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, transform);
                     yield break;
                 }
-                else Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + string.Join("", ans));
+                else {
+                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + string.Join("", ans));
+                    if(!freeCheckActive) Debug.Log("[Forget Everything #"+thisLoggingID+"] Free check added.");
+                    freeCheckActive = true;
+                }
             }
-            GetComponent<KMBombModule>().HandleStrike();
+            if(freeCheckActive && displayOverride != -1) {
+                //We had a free check, and a stage is being shown
+                freeCheckActive = false;
+                Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, transform);
+                Debug.Log("[Forget Everything #"+thisLoggingID+"] Free check was available, consuming it.");
+            }
+            else GetComponent<KMBombModule>().HandleStrike();
             Submit.transform.localRotation = Quaternion.Euler(0, 90, 0);
             Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.25f);
             LEDactive = true;
