@@ -9,10 +9,11 @@ public class EvilMemory : MonoBehaviour
     //Debug variables
     private const int EXTRA_STAGES = 0;
     private const bool PLAYTEST_MODE = false;
+    private const bool PLAYTEST_MODE_SKIP = false;
 
     //How intense should stages be shuffled? 1 is no shuffle, 99 is full shuffle.
-    //This is implemented as "how many stages can I pick from?". For stage N, it can pick any missing stage from 1 to N+k-1.
-    //For low module counts, this is effectively random. For high module counts, this should encourage earlier stages to show first.
+    //This is implemented as "how many stages can I pick from?". For stage N with factor k, it can pick any missing stage from 1 to N+k-1. There will be no more than k choices.
+    //For low module counts, this is effectively random. For high module counts, this should encourage earlier stages to show first and forces late stages to show later.
     //The first stage can still show last, but it's extremely improbable.
     private const int STAGE_RANDOM_FACTOR = 10;
 
@@ -235,11 +236,16 @@ public class EvilMemory : MonoBehaviour
                         ans += Solution[b];
                         disp += DialDisplay[a][b];
                     }
-                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage " + (a+1).ToString("D2") + " is an important stage. Display: " + disp + ", Colour: " + colName + " " + (colFromMissing ? "(missing colour)" : " (most frequent)") + ", New answer: " + ans);
+                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage " + (a+1).ToString("D2") + " - Display: " + disp + ", Tubes: " + n1+n2 + ", Colour: " + colName + " " + (colFromMissing ? "(missing colour)" : " (most frequent)") + ", New answer: " + ans);
                 }
                 else {
                     if(stageCounter >= 0) stageCounter = -1;
                     else stageCounter--;
+                    string disp = "";
+                    for(int b = 0; b < 10; b++) {
+                        disp += DialDisplay[a][b];
+                    }
+                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage " + (a+1).ToString("D2") + " - Display: " + disp + ", Tubes: " + n1+n2 + ", Not important.");
                 }
             }
         }
@@ -247,6 +253,8 @@ public class EvilMemory : MonoBehaviour
         string ans2 = "";
         for(int b = 0; b < 10; b++) ans2 += Solution[b];
         Debug.Log("[Forget Everything #"+thisLoggingID+"] Final answer: " + ans2);
+
+        if(PLAYTEST_MODE_SKIP) displayCurStage = StageOrdering.Length;
     }
 
     int ticker = 0, displayOverride = -1;
@@ -281,6 +289,14 @@ public class EvilMemory : MonoBehaviour
         if(done || StageOrdering == null) return;
         if(displayTimer > 0) displayTimer -= Time.fixedDeltaTime;
 
+        if(displayOverride != -1) {
+            if(displayTimer <= 0) {
+                displayTimer = STAGE_DELAY;
+                displayOverride += 10;
+                if(displayOverride >= StageOrdering.Length) displayOverride = -1;
+            }
+        }
+
         ticker++;
         if(ticker == 15)
         {
@@ -295,6 +311,7 @@ public class EvilMemory : MonoBehaviour
             }
             if(progress >= StageOrdering.Length && displayOverride == -1) {
                 //Ready to solve
+                if(!Text.text.Equals("--")) ShowNumber(new int[]{0,0,0,0,0,0,0,0,0,0});
                 Text.text = "--";
                 Nix1.SetValue(-1);
                 Nix2.SetValue(-1);
@@ -418,23 +435,26 @@ public class EvilMemory : MonoBehaviour
         else {
             int dispOver = -1;
             bool wantsOver = true;
-            for(int a = 0; a < 8; a++) {
-                if(Dials[a].GetComponent<Dial>().GetValue() != 0) {
+            for(int a = 0; a < 10; a++) {
+                int v = Dials[a].GetComponent<Dial>().GetValue();
+                if(v == 1) {
+                    if(dispOver == -1) dispOver = a;
+                    else {
+                        wantsOver = false;
+                        break;
+                    }
+                }
+                else if(v != 0) {
                     wantsOver = false;
                     break;
                 }
             }
+            if(dispOver == -1) wantsOver = false;
             if(wantsOver) {
-                dispOver = Dials[8].GetComponent<Dial>().GetValue() * 10 + Dials[9].GetComponent<Dial>().GetValue();
-                if(dispOver == 0 || dispOver > StageOrdering.Length) {
-                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Incorrect answer: " + string.Join("", ans));
-                    if(!freeCheckActive) Debug.Log("[Forget Everything #"+thisLoggingID+"] Free check added.");
-                    freeCheckActive = true;
-                }
-                else {
-                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage display override in exchange for strike: Stage " + dispOver.ToString("D2"));
-                    displayOverride = dispOver-1;
-                }
+                displayOverride = dispOver;
+                displayTimer = STAGE_DELAY;
+                Debug.Log("[Forget Everything #"+thisLoggingID+"] Position check override in exchange for strike: Position " + (dispOver+1));
+                for(int a = 0; a < 10; a++) DialLED[a].material.color = LED_OFF;
             }
             else {
                 //If you've noticed this, keep it a secret.
@@ -540,23 +560,7 @@ public class EvilMemory : MonoBehaviour
                 HandleSubmit();
                 yield break;
             }
-            if(cmd.Length == 2) {
-                int stage = 0;
-                bool valid = int.TryParse(cmd, out stage);
-                if(!valid || stage < 1 || stage > StageOrdering.Length) {
-                    yield return "sendtochaterror Bad stage: " + cmd + ", stage number must be between 1 and " + StageOrdering.Length + " inclusive.";
-                    yield break;
-                }
-
-                yield return "Forget Everything";
-                ShowNumber(new int[]{0,0,0,0,0,0,0,0,stage/10,stage%10});
-                for(int a = 0; a < 10; a++) {
-                    while(Dials[a].GetComponent<Dial>().GetValue() == -1) yield return new WaitForSeconds(0.1f);
-                }
-                HandleSubmit();
-                yield break;
-            }
-            yield return "sendtochaterror Answers need either 2 or 10 digits.";
+            yield return "sendtochaterror Answers need 10 digits.";
             yield break;
         }
         yield return "sendtochaterror Commands must start with 'submit'.";
