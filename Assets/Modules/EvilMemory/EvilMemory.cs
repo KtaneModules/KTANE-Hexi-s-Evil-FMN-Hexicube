@@ -524,7 +524,7 @@ public class EvilMemory : MonoBehaviour
     //Twitch Plays support
 
     #pragma warning disable 0414
-    string TwitchHelpMessage = "Submit answers with 'submit 1234567890'. Re-show stage info with 'submit 12' or 'submit 0000000012'.";
+    string TwitchHelpMessage = "Submit answers with 'submit 1234567890'. Request position checks with 'submit 0000010000'.";
     #pragma warning restore 0414
 
     public void TwitchHandleForcedSolve() {
