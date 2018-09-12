@@ -18,7 +18,7 @@ public class EvilMemory : MonoBehaviour
     private const int STAGE_RANDOM_FACTOR = 10;
 
     //Delay between stages displaying
-    private const float STAGE_DELAY = 3;
+    private const float STAGE_DELAY = 4;
 
     //Toggle for flipping dial controls
     private const bool FLIP_DIAL_BUTTONS = false;
@@ -120,6 +120,17 @@ public class EvilMemory : MonoBehaviour
 
         GetComponent<KMBombModule>().OnActivate += ActivateModule;
         Submit.OnInteract += HandleSubmit;
+    }
+
+    private string niceCols(int[] list) {
+        string resp = "";
+        foreach(int i in list) {
+            if(i == 0)      resp += "R";
+            else if(i == 1) resp += "Y";
+            else if(i == 2) resp += "G";
+            else            resp += "B";
+        }
+        return resp;
     }
 
     private void ActivateModule()
@@ -236,7 +247,7 @@ public class EvilMemory : MonoBehaviour
                         ans += Solution[b];
                         disp += DialDisplay[a][b];
                     }
-                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage " + (a+1).ToString("D2") + " - Display: " + disp + ", Tubes: " + n1+n2 + ", Colour: " + colName + " " + (colFromMissing ? "(missing colour)" : " (most frequent)") + ", New answer: " + ans);
+                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage " + (a+1).ToString("D2") + " - Display: " + disp + ", Tubes: " + n1+n2 + ", Colours: " + niceCols(LEDDisplay[a]) + " " + colName + " " + (colFromMissing ? "(missing colour)" : " (most frequent)") + ", New answer: " + ans);
                 }
                 else {
                     if(stageCounter >= 0) stageCounter = -1;
