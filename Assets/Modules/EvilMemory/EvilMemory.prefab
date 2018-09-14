@@ -280,7 +280,7 @@ MonoBehaviour:
   thisLoggingID: 0
   BombInfo: {fileID: 11422750}
   Sound: {fileID: 11486916}
-  HighVisMat: {fileID: 2100000, guid: 9da60c94155bb8b48be8abfc8ba59973, type: 2}
+  HighVisMat: {fileID: 2100000, guid: 0d0c858655e1092479521fdd618b2764, type: 2}
   Settings: {fileID: 114823495588545070}
   DialContainer: {fileID: 1766536453788368}
   Submit: {fileID: 114411331885626532}
