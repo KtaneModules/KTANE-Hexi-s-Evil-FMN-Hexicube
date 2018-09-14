@@ -29,6 +29,7 @@ GameObject:
   - component: {fileID: 11422750}
   - component: {fileID: 11430790}
   - component: {fileID: 11486916}
+  - component: {fileID: 114823495588545070}
   m_Layer: 0
   m_Name: EvilMemory
   m_TagString: Untagged
@@ -279,6 +280,8 @@ MonoBehaviour:
   thisLoggingID: 0
   BombInfo: {fileID: 11422750}
   Sound: {fileID: 11486916}
+  HighVisMat: {fileID: 2100000, guid: 9da60c94155bb8b48be8abfc8ba59973, type: 2}
+  Settings: {fileID: 114823495588545070}
   DialContainer: {fileID: 1766536453788368}
   Submit: {fileID: 114411331885626532}
   Text: {fileID: 102000013782795338}
@@ -9586,6 +9589,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShaderNames:
   - Hexi/EmissiveTint
+--- !u!114 &114823495588545070
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 164962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -289456416, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Settings: 
+  SettingsPath: 
 --- !u!114 &114827370345895060
 MonoBehaviour:
   m_ObjectHideFlags: 1
