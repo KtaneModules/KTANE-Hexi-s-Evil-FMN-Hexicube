@@ -26,6 +26,11 @@ public class EvilMemory : MonoBehaviour
     //How many unique colours to create for the flashing "free stage check" LED
     private const int STAGE_CHECK_FIDELITY = 25;
 
+    //Config stuff
+    private static bool configRead = false;
+    private static bool highVisDials = false;
+    private static float scaleFactor = 2;
+
     public static readonly string[] ignoredModules = {
         "Forget Me Not",     //Regular version.
         "Forget Everything", //Mandatory to prevent unsolvable bombs.
@@ -45,6 +50,7 @@ public class EvilMemory : MonoBehaviour
 
     public KMBombInfo BombInfo;
     public KMAudio Sound;
+    public Material HighVisMat;
 
     public GameObject DialContainer;
     private GameObject[] Dials;
@@ -64,6 +70,19 @@ public class EvilMemory : MonoBehaviour
 
     void Awake()
     {
+        if(!configRead) {
+            //read it
+            configRead = true;
+        }
+
+        if(scaleFactor != 2) {
+            Transform tr = transform.Find("Dial Container").transform;
+            float realScalar = scaleFactor / 2; //default scale is 2
+            tr.localScale *= realScalar;
+            realScalar--;
+            tr.localPosition = new Vector3(tr.localPosition.x - realScalar * 0.065f, tr.localPosition.y, tr.localPosition.z);
+        }
+
         if(LED_INTENSITY == null) {
             LED_INTENSITY = new Color[STAGE_CHECK_FIDELITY];
             for(int a = 0; a < STAGE_CHECK_FIDELITY; a++) LED_INTENSITY[a] = LED_COLS[0] * (STAGE_CHECK_FIDELITY-a) / STAGE_CHECK_FIDELITY;
@@ -79,6 +98,10 @@ public class EvilMemory : MonoBehaviour
             Dials[a] = DialContainer.transform.Find("Dial " + (a+1)).gameObject;
             DialLED[a] = DialContainer.transform.Find("Dial LED " + (a+1)).GetComponent<MeshRenderer>();
             DialLED[a].material.color = LED_OFF;
+
+            if(highVisDials) {
+                Dials[a].GetComponent<MeshRenderer>().material = HighVisMat;
+            }
 
             int a2 = a;
             Transform o = DialContainer.transform.Find("Dial " + (a+1) + " Increment");

@@ -201,6 +201,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 11430790, guid: 8c114d371321ddc45ac285b8f2d15ec0, type: 2}
+      propertyPath: HighVisMat
+      value: 
+      objectReference: {fileID: 2100000, guid: 9da60c94155bb8b48be8abfc8ba59973, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8c114d371321ddc45ac285b8f2d15ec0, type: 2}
   m_IsPrefabParent: 0
