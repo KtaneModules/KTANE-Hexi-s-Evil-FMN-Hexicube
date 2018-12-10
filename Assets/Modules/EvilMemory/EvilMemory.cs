@@ -20,15 +20,14 @@ public class EvilMemory : MonoBehaviour
     //Delay between stages displaying
     private const float STAGE_DELAY = 4;
 
-    //Toggle for flipping dial controls
-    private const bool FLIP_DIAL_BUTTONS = false;
-
     //How many unique colours to create for the flashing "free stage check" LED
     private const int STAGE_CHECK_FIDELITY = 25;
 
     //Config stuff
     private bool highVisDials = false;
     private float scaleFactor = 1;
+    private bool advanceWithKey = false;
+    private bool reverseDialControls = false;
 
     public static readonly string[] ignoredModules = {
         "Forget Me Not",     //Regular version.
@@ -72,6 +71,8 @@ public class EvilMemory : MonoBehaviour
     public class EvilFMNSettings {
         public bool highVis;
         public float scale;
+        public bool advanceWithKey;
+        public bool reverseDialControls;
     }
 
     void DoSettings() {
@@ -84,6 +85,8 @@ public class EvilMemory : MonoBehaviour
         else {
             highVisDials = set.highVis;
             scaleFactor = set.scale;
+            advanceWithKey = set.advanceWithKey;
+            reverseDialControls = set.reverseDialControls;
         }
 
         if(scaleFactor != 2) {
@@ -123,7 +126,7 @@ public class EvilMemory : MonoBehaviour
 
             int a2 = a;
             Transform o = DialContainer.transform.Find("Dial " + (a+1) + " Increment");
-            if(FLIP_DIAL_BUTTONS) {
+            if(reverseDialControls) {
                 o.localPosition = new Vector3(-o.localPosition.x, o.localPosition.y, o.localPosition.z);
                 o.localEulerAngles = new Vector3(-o.localEulerAngles.x, o.localEulerAngles.y, o.localEulerAngles.z);
             }
@@ -132,7 +135,7 @@ public class EvilMemory : MonoBehaviour
                 return false;
             };
             o = DialContainer.transform.Find("Dial " + (a+1) + " Decrement");
-            if(FLIP_DIAL_BUTTONS) {
+            if(reverseDialControls) {
                 o.localPosition = new Vector3(-o.localPosition.x, o.localPosition.y, o.localPosition.z);
                 o.localEulerAngles = new Vector3(-o.localEulerAngles.x, o.localEulerAngles.y, o.localEulerAngles.z);
             }
@@ -341,7 +344,7 @@ public class EvilMemory : MonoBehaviour
         if(done || StageOrdering == null) return;
         if(displayTimer > 0) displayTimer -= Time.fixedDeltaTime;
 
-        if(displayOverride != -1) {
+        if(displayOverride != -1 && !advanceWithKey) {
             if(displayTimer <= 0) {
                 displayTimer = STAGE_DELAY;
                 displayOverride += 10;
@@ -410,10 +413,16 @@ public class EvilMemory : MonoBehaviour
     }
 
     private bool HandleSubmit() {
-        displayOverride = -1;
-
         Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.5f);
         Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+
+        if (displayOverride != -1 && advanceWithKey) {
+            displayOverride += 10;
+            if(displayOverride >= StageOrdering.Length) displayOverride = -1;
+            return false;
+        }
+
+        displayOverride = -1;
         if(done || StageOrdering == null || doingSolve) return false;
 
         if(PLAYTEST_MODE) {

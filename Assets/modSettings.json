@@ -1,4 +1,6 @@
 {
     "highVis": false,
-    "scale": 1.0
+    "scale": 1.0,
+	"advanceWithKey": false,
+	"reverseDialControls": false
 }
