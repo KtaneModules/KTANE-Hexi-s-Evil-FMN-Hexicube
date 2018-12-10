@@ -585,7 +585,7 @@ public class EvilMemory : MonoBehaviour
     //Twitch Plays support
 
     #pragma warning disable 0414
-    string TwitchHelpMessage = "Submit answers with 'submit 1234567890'. Request position checks with 'submit 0000010000'.";
+    string TwitchHelpMessage = "Submit answers with 'submit 1234567890'. Request position checks with 'submit 0000010000'. Advance position checks with 'advance' (requires config option).";
     #pragma warning restore 0414
 
     public void TwitchHandleForcedSolve() {
@@ -600,6 +600,15 @@ public class EvilMemory : MonoBehaviour
 
     public IEnumerator ProcessTwitchCommand(string cmd) {
         cmd = cmd.ToLowerInvariant();
+        if(cmd.Equals("advance") || cmd.Equals("next")) {
+            if (!advanceWithKey) {
+                yield return "sendtochaterror Advancing with key is disabled.";
+                yield break;
+            }
+            yield return "Forget Everything";
+            HandleSubmit();
+            yield break;
+        }
         if(cmd.StartsWith("press ") || cmd.StartsWith("submit ")) {
             cmd = cmd.Substring(cmd.IndexOf(' ')+1);
             if(cmd.Length == 10) {
