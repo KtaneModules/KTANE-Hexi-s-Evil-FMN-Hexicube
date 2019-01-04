@@ -35,6 +35,7 @@ public class EvilMemory : MonoBehaviour
         "Turn The Key",      //TTK is timer based, and stalls the bomb if only it and FE are left.
         "Souvenir",          //Similar situation to TTK, stalls the bomb.
         "The Time Keeper",   //Again, timilar to TTK.
+        "Simon's Stages",    //Not sure, told to add it.
     };
 
     private static Color LED_OFF = new Color(0, 0, 0, 0);
