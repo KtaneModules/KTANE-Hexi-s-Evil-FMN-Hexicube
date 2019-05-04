@@ -29,14 +29,7 @@ public class EvilMemory : MonoBehaviour
     private bool advanceWithKey = false;
     private bool reverseDialControls = false;
 
-    public static readonly string[] ignoredModules = {
-        "Forget Me Not",     //Regular version.
-        "Forget Everything", //Mandatory to prevent unsolvable bombs.
-        "Turn The Key",      //TTK is timer based, and stalls the bomb if only it and FE are left.
-        "Souvenir",          //Similar situation to TTK, stalls the bomb.
-        "The Time Keeper",   //Again, timilar to TTK.
-        "Simon's Stages",    //Not sure, told to add it.
-    };
+    public static string[] ignoredModules = null;
 
     private static Color LED_OFF = new Color(0, 0, 0, 0);
     private static Color[] LED_COLS = new Color[]{new Color(0.7f, 0,    0, 1),
@@ -107,6 +100,20 @@ public class EvilMemory : MonoBehaviour
 
     void Awake()
     {
+        if (ignoredModules == null) {
+            ignoredModules = GetComponent<KMBossModule>().GetIgnoredModules("Forget Everything", new string[]{
+                "Forget Me Not",     //Regular version.
+                "Forget Everything", //Mandatory to prevent unsolvable bombs.
+                "Turn The Key",      //TTK is timer based, and stalls the bomb if only it and FMN are left.
+                "Souvenir",          //Similar situation to TTK, stalls the bomb.
+                "The Time Keeper",   //Again, timilar to TTK.
+                "Simon's Stages",    //Not sure, told to add it.
+                "Alchemy",
+                "Forget This",
+                "Simon's Stages",
+                "Timing is Everything",
+            });
+        }
         Invoke("DoSettings", 0.1f);
 
         if(LED_INTENSITY == null) {
