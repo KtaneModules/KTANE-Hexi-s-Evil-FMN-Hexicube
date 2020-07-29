@@ -1072,6 +1072,7 @@ GameObject:
   - component: {fileID: 33668958538878276}
   - component: {fileID: 23925379018791866}
   - component: {fileID: 114895705291077790}
+  - component: {fileID: 114744014184682808}
   m_Layer: 0
   m_Name: Dial 1
   m_TagString: Untagged
@@ -1562,6 +1563,7 @@ GameObject:
   - component: {fileID: 33303421923921614}
   - component: {fileID: 23955414829265168}
   - component: {fileID: 114596727549231668}
+  - component: {fileID: 114303109105324594}
   m_Layer: 0
   m_Name: Dial 3
   m_TagString: Untagged
@@ -1872,6 +1874,7 @@ GameObject:
   - component: {fileID: 33524409965057530}
   - component: {fileID: 23340302103371638}
   - component: {fileID: 114882189846038892}
+  - component: {fileID: 114934742900892132}
   m_Layer: 0
   m_Name: Dial 2
   m_TagString: Untagged
@@ -8887,6 +8890,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlightScale: {x: 0, y: 0, z: 0}
   OutlineAmount: 0
+--- !u!114 &114303109105324594
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1536270759898774}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - KT/Mobile/DiffuseTint
 --- !u!114 &114311893424498362
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -9933,6 +9949,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShaderNames:
   - KT/Mobile/DiffuseTint
+--- !u!114 &114744014184682808
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1316405871116908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - KT/Mobile/DiffuseTint
 --- !u!114 &114747920604748570
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -10255,6 +10284,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShaderNames:
   - Hexi/EmissiveTint
+--- !u!114 &114934742900892132
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1735812703215934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - KT/Mobile/DiffuseTint
 --- !u!114 &114940230456241434
 MonoBehaviour:
   m_ObjectHideFlags: 1
