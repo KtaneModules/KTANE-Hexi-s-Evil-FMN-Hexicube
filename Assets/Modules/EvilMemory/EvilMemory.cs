@@ -44,11 +44,13 @@ public class EvilMemory : MonoBehaviour
     public KMBombInfo BombInfo;
     public KMAudio Sound;
     public Material HighVisMat;
+    public Material SmallHighVisMat;
     public KMModSettings Settings;
 
     public GameObject DialContainer;
     private GameObject[] Dials;
     private MeshRenderer[] DialLED;
+    public SmallDial[] LEDDials;
     public KMSelectable Submit;
     public TextMesh Text;
     public Nixie Nix1, Nix2;
@@ -95,6 +97,19 @@ public class EvilMemory : MonoBehaviour
             for(int a = 0; a < 10; a++) {
                 Dials[a].GetComponent<MeshRenderer>().material = HighVisMat;
             }
+        }
+
+        KMColorblindMode cb = GetComponent<KMColorblindMode>();
+        if (cb != null && !cb.ColorblindModeActive) {
+            // is this bad?
+            LEDDials[0].gameObject.transform.localScale = new Vector3(0,0,0);
+            LEDDials[1].gameObject.transform.localScale = new Vector3(0,0,0);
+            LEDDials[2].gameObject.transform.localScale = new Vector3(0,0,0);
+        }
+        else if(highVisDials) {
+            LEDDials[0].GetComponent<MeshRenderer>().material = SmallHighVisMat;
+            LEDDials[1].GetComponent<MeshRenderer>().material = SmallHighVisMat;
+            LEDDials[2].GetComponent<MeshRenderer>().material = SmallHighVisMat;
         }
     }
 
@@ -379,8 +394,11 @@ public class EvilMemory : MonoBehaviour
                 Nix1.SetValue(-1);
                 Nix2.SetValue(-1);
                 LED.materials[1].color = LED_OFF;
+                LEDDials[0].Move(0);
                 LED.materials[2].color = LED_OFF;
+                LEDDials[1].Move(0);
                 LED.materials[3].color = LED_OFF;
+                LEDDials[2].Move(0);
             }
             else {
                 //Showing stages
@@ -393,8 +411,11 @@ public class EvilMemory : MonoBehaviour
                 Nix2.SetValue(NixieDisplay[stage] % 10);
                 ShowNumber(DialDisplay[stage]);
                 LED.materials[1].color = LED_COLS[LEDDisplay[stage][0]];
+                LEDDials[0].Move(LEDDisplay[stage][0]);
                 LED.materials[2].color = LED_COLS[LEDDisplay[stage][1]];
+                LEDDials[1].Move(LEDDisplay[stage][1]);
                 LED.materials[3].color = LED_COLS[LEDDisplay[stage][2]];
+                LEDDials[2].Move(LEDDisplay[stage][2]);
             }
         }
     }
