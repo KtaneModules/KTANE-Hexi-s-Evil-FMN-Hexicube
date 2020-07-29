@@ -614,7 +614,7 @@ public class EvilMemory : MonoBehaviour
     //Twitch Plays support
 
     #pragma warning disable 0414
-    string TwitchHelpMessage = "Submit answers with 'submit 1234567890'. Request position checks with 'submit 0000010000'. Advance position checks with 'advance' (requires config option).";
+    string TwitchHelpMessage = "Submit answers with 'submit 1234567890'. Request position checks with 'submit 0000010000'. Advance position checks with 'advance' (requires config option). Toggle colourblind mode with 'colourblind'.";
     #pragma warning restore 0414
 
     public void TwitchHandleForcedSolve() {
@@ -629,6 +629,18 @@ public class EvilMemory : MonoBehaviour
 
     public IEnumerator ProcessTwitchCommand(string cmd) {
         cmd = cmd.ToLowerInvariant();
+        if(cmd.Equals("colourblind") || cmd.Equals("colorblind") || cmd.Equals("blind") || cmd.Equals("useyourhumaneyes")) {
+            if (LEDDials[0].gameObject.transform.localScale.x == 0) {
+                LEDDials[0].gameObject.transform.localScale = new Vector3(2.25f,2.25f,2.25f);
+                LEDDials[1].gameObject.transform.localScale = new Vector3(2.25f,2.25f,2.25f);
+                LEDDials[2].gameObject.transform.localScale = new Vector3(2.25f,2.25f,2.25f);
+            }
+            else {
+                LEDDials[0].gameObject.transform.localScale = new Vector3(0,0,0);
+                LEDDials[1].gameObject.transform.localScale = new Vector3(0,0,0);
+                LEDDials[2].gameObject.transform.localScale = new Vector3(0,0,0);
+            }
+        }
         if(cmd.Equals("advance") || cmd.Equals("next")) {
             if (!advanceWithKey) {
                 yield return "sendtochaterror Advancing with key is disabled.";
