@@ -106,7 +106,7 @@ public class EvilMemory : MonoBehaviour
             LEDDials[1].gameObject.transform.localScale = new Vector3(0,0,0);
             LEDDials[2].gameObject.transform.localScale = new Vector3(0,0,0);
         }
-        else if(highVisDials) {
+        if(highVisDials) {
             LEDDials[0].GetComponent<MeshRenderer>().material = SmallHighVisMat;
             LEDDials[1].GetComponent<MeshRenderer>().material = SmallHighVisMat;
             LEDDials[2].GetComponent<MeshRenderer>().material = SmallHighVisMat;
