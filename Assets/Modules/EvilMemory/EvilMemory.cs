@@ -117,16 +117,54 @@ public class EvilMemory : MonoBehaviour
     {
         if (ignoredModules == null) {
             ignoredModules = GetComponent<KMBossModule>().GetIgnoredModules("Forget Everything", new string[]{
-                "Forget Me Not",     //Regular version.
-                "Forget Everything", //Mandatory to prevent unsolvable bombs.
-                "Turn The Key",      //TTK is timer based, and stalls the bomb if only it and FMN are left.
-                "Souvenir",          //Similar situation to TTK, stalls the bomb.
-                "The Time Keeper",   //Again, timilar to TTK.
-                "Simon's Stages",    //Not sure, told to add it.
-                "Alchemy",
+                "14",
+                "42",
+                "501",
+                "A>N<D",
+                "Bamboozling Time Keeper",
+                "Black Arrows",
+                "Brainf---",
+                "Busy Beaver",
+                "Don't Touch Anything",
+                "Floor Lights",
+                "Forget Any Color",
+                "Forget Enigma",
+                "Forget Everything",
+                "Forget Infinity",
+                "Forget It Not",
+                "Forget Maze Not",
+                "Forget Me Later",
+                "Forget Me Not",
+                "Forget Perspective",
+                "Forget The Colors",
+                "Forget Them All",
                 "Forget This",
+                "Forget Us Not",
+                "Iconic",
+                "Keypad Directionality",
+                "Kugelblitz",
+                "Multitask",
+                "OmegaDestroyer",
+                "OmegaForest",
+                "Organization",
+                "Password Destroyer",
+                "Purgatory",
+                "RPS Judging",
+                "Security Council",
+                "Shoddy Chess",
+                "Simon Forgets",
                 "Simon's Stages",
+                "Souvenir",
+                "Tallordered Keys",
+                "The Time Keeper",
                 "Timing is Everything",
+                "The Troll",
+                "Turn The Key",
+                "The Twin",
+                "Übermodule",
+                "Ultimate Custom Night",
+                "The Very Annoying Button",
+                "Whiteout"
             });
         }
         Invoke("DoSettings", 0.1f);
