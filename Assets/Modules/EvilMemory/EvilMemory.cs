@@ -7,15 +7,9 @@ using System.Linq;
 public class EvilMemory : MonoBehaviour
 {
     //Debug variables
-    private const int EXTRA_STAGES = 0;
+    private const int EXTRA_STAGES = 100;
     private const bool PLAYTEST_MODE = false;
     private const bool PLAYTEST_MODE_SKIP = false;
-
-    //How intense should stages be shuffled? 1 is no shuffle, 99 is full shuffle.
-    //This is implemented as "how many stages can I pick from?". For stage N with factor k, it can pick any missing stage from 1 to N+k-1. There will be no more than k choices.
-    //For low module counts, this is effectively random. For high module counts, this should encourage earlier stages to show first and forces late stages to show later.
-    //The first stage can still show last, but it's extremely improbable.
-    private const int STAGE_RANDOM_FACTOR = 10;
 
     //Delay between stages displaying
     private const float STAGE_DELAY = 4;
@@ -24,10 +18,12 @@ public class EvilMemory : MonoBehaviour
     private const int STAGE_CHECK_FIDELITY = 25;
 
     //Config stuff
-    private bool highVisDials = false;
-    private float scaleFactor = 1;
-    private bool advanceWithKey = false;
-    private bool reverseDialControls = false;
+    private bool highVisDials = false;        // If true, dials are white on black
+    private float scaleFactor = 1;            // Scaling of dials
+    private bool advanceWithKey = false;      // If true, stage repeating advances on submit instead of per 4s
+    private bool reverseDialControls = false; // If true, flips dial controls
+    private int stageRandomForward  = 10;     // How many solves ahead a stage can appear (solve 20 can appear as late as 30)
+    private int stageRandomBackward = 5;      // How many solves behind a stage can appear (solve 20 can appear as early as 15)
 
     public static string[] ignoredModules = null;
 
@@ -69,6 +65,8 @@ public class EvilMemory : MonoBehaviour
         public float scale;
         public bool advanceWithKey;
         public bool reverseDialControls;
+        public int stageRandomForward;
+        public int stageRandomBackward;
     }
 
     void DoSettings() {
@@ -76,6 +74,8 @@ public class EvilMemory : MonoBehaviour
         if(set == null || set.scale <= 0) {
             set = new EvilFMNSettings();
             set.scale = 1;
+            set.stageRandomForward = 10;
+            set.stageRandomBackward = 5;
             Settings.Settings = JsonUtility.ToJson(set, true);
         }
         else {
@@ -83,6 +83,8 @@ public class EvilMemory : MonoBehaviour
             scaleFactor = set.scale;
             advanceWithKey = set.advanceWithKey;
             reverseDialControls = set.reverseDialControls;
+            stageRandomForward = set.stageRandomForward;
+            stageRandomBackward = set.stageRandomBackward;
         }
 
         if(scaleFactor != 2) {
@@ -267,9 +269,23 @@ public class EvilMemory : MonoBehaviour
         int opCount = 1;
         int stageCounter = 1;
         for(int a = 0; a < count; a++) {
-            int p = Random.Range(0, Mathf.Min(stages.Count, STAGE_RANDOM_FACTOR));
-            StageOrdering[a] = stages[p];
-            stages.RemoveAt(p);
+            int min = a-stageRandomForward;
+            List<int> availStages = stages.Where(it => it <= a+stageRandomBackward && it >= a-stageRandomForward).ToList();
+            if (availStages.Count == 0) {
+                // This should never happen, but just in case...
+                Debug.Log("[Forget Everything #"+thisLoggingID+"] WARN: Stage " + (a+1).ToString("D2") + " was forced to pick outside the config-specified range!");
+                int nearLow = -1, nearHigh = -1;
+                stages.ForEach(it => {
+                    if (it < a) nearLow = Mathf.Max(nearLow, it);
+                    else nearHigh = Mathf.Min(nearHigh, it);
+                });
+                if (nearLow != -1) availStages.Add(nearLow);
+                if (nearHigh != -1) availStages.Add(nearHigh);
+            }
+            int p = availStages[Random.Range(0, availStages.Count)];
+            if (availStages.Contains(min)) p = min;
+            StageOrdering[a] = p;
+            stages.Remove(p);
 
             DialDisplay[a] = new int[10];
             for(int b = 0; b < 10; b++) DialDisplay[a][b] = Random.Range(0, 10);
@@ -365,6 +381,7 @@ public class EvilMemory : MonoBehaviour
                 }
             }
         }
+        Debug.Log("[Forget Everything #"+thisLoggingID+"] Stage order: " + StageOrdering.ToList().ConvertAll(it => (it+1).ToString("D2")).Join(","));
         Debug.Log("[Forget Everything #"+thisLoggingID+"] Total important stages: " + opCount);
         string ans2 = "";
         for(int b = 0; b < 10; b++) ans2 += Solution[b];
