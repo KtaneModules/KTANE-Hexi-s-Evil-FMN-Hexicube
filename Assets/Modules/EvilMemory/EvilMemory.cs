@@ -7,7 +7,7 @@ using System.Linq;
 public class EvilMemory : MonoBehaviour
 {
     //Debug variables
-    private const int EXTRA_STAGES = 100;
+    private const int EXTRA_STAGES = 0;
     private const bool PLAYTEST_MODE = false;
     private const bool PLAYTEST_MODE_SKIP = false;
 
