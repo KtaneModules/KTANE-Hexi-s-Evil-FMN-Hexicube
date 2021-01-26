@@ -85,6 +85,13 @@ public class EvilMemory : MonoBehaviour
             reverseDialControls = set.reverseDialControls;
             stageRandomForward = set.stageRandomForward;
             stageRandomBackward = set.stageRandomBackward;
+            if (stageRandomForward == 0 && stageRandomBackward == 0) {
+                stageRandomForward = 10;
+                stageRandomBackward = 10;
+                Settings.Settings = JsonUtility.ToJson(set, true);
+            }
+            if (stageRandomForward < 0) stageRandomForward = 0;
+            if (stageRandomBackward < 0) stageRandomBackward = 0;
         }
 
         if(scaleFactor != 2) {
