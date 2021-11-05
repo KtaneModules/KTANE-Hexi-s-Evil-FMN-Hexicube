@@ -661,7 +661,13 @@ public class EvilMemory : MonoBehaviour
                 Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonRelease, transform);
                 Debug.Log("[Forget Everything #"+thisLoggingID+"] Free check was available, consuming it.");
             }
-            else GetComponent<KMBombModule>().HandleStrike();
+            else {
+                if (displayOverride != -1) {
+                    Debug.Log("[Forget Everything #"+thisLoggingID+"] Free check was NOT available, striking and adding it.");
+                    freeCheckActive = true; //Took a strike for a check, award an extra
+                }
+                GetComponent<KMBombModule>().HandleStrike();
+            }
             Submit.transform.localRotation = Quaternion.Euler(0, 90, 0);
             Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.25f);
             LEDactive = true;
