@@ -287,6 +287,8 @@ MonoBehaviour:
   HighVisMat: {fileID: 2100000, guid: 0d0c858655e1092479521fdd618b2764, type: 2}
   SmallHighVisMat: {fileID: 2100000, guid: c6fe872dddd08644c887b424bb2e6e85, type: 2}
   Settings: {fileID: 114823495588545070}
+  StandardMesh: {fileID: 4300000, guid: 812c6c3d2d1d92b4a82a32306b16237f, type: 3}
+  ColourblindMesh: {fileID: 4300000, guid: 091cd8b6845893046ae83969acc3ecf4, type: 3}
   DialContainer: {fileID: 1766536453788368}
   LEDDials:
   - {fileID: 114895705291077790}
@@ -2607,7 +2609,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1536270759898774}
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.008, y: 0.00025, z: 0.0275}
+  m_LocalPosition: {x: -0.0225, y: 0.00025, z: 0.0275}
   m_LocalScale: {x: 2.25, y: 2.25, z: 2.25}
   m_Children: []
   m_Father: {fileID: 4363432598588248}
@@ -3143,7 +3145,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1735812703215934}
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.008, y: 0.00025, z: 0}
+  m_LocalPosition: {x: -0.0225, y: 0.00025, z: 0}
   m_LocalScale: {x: 2.25, y: 2.25, z: 2.25}
   m_Children: []
   m_Father: {fileID: 4363432598588248}
@@ -3898,7 +3900,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1316405871116908}
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.008, y: 0.00025, z: -0.0275}
+  m_LocalPosition: {x: -0.0225, y: 0.00025, z: -0.0275}
   m_LocalScale: {x: 2.25, y: 2.25, z: 2.25}
   m_Children: []
   m_Father: {fileID: 4363432598588248}
@@ -7405,7 +7407,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1520241941439494}
-  m_Mesh: {fileID: 4300000, guid: 4741eb922cc02a74383a4a2727a61cef, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 90faf08537b77e946b87aad2daa20b61, type: 3}
 --- !u!33 &33161218162570156
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -7608,7 +7610,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1354266272227770}
-  m_Mesh: {fileID: 4300000, guid: 091cd8b6845893046ae83969acc3ecf4, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 812c6c3d2d1d92b4a82a32306b16237f, type: 3}
 --- !u!33 &33433604015240620
 MeshFilter:
   m_ObjectHideFlags: 1

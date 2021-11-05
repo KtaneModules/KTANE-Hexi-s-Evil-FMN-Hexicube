@@ -42,6 +42,7 @@ public class EvilMemory : MonoBehaviour
     public Material HighVisMat;
     public Material SmallHighVisMat;
     public KMModSettings Settings;
+    public Mesh StandardMesh, ColourblindMesh;
 
     public GameObject DialContainer;
     private GameObject[] Dials;
@@ -114,7 +115,9 @@ public class EvilMemory : MonoBehaviour
             LEDDials[0].gameObject.transform.localScale = new Vector3(0,0,0);
             LEDDials[1].gameObject.transform.localScale = new Vector3(0,0,0);
             LEDDials[2].gameObject.transform.localScale = new Vector3(0,0,0);
+            LED.GetComponent<MeshFilter>().mesh = StandardMesh;
         }
+        else LED.GetComponent<MeshFilter>().mesh = ColourblindMesh;
         if(highVisDials) {
             LEDDials[0].GetComponent<MeshRenderer>().material = SmallHighVisMat;
             LEDDials[1].GetComponent<MeshRenderer>().material = SmallHighVisMat;
@@ -216,9 +219,9 @@ public class EvilMemory : MonoBehaviour
         }
 
         MeshRenderer mr = transform.Find("Display").Find("Wiring").GetComponent<MeshRenderer>();
-        mr.materials[0].color = new Color(0.1f, 0.1f, 0.1f);
+        mr.materials[2].color = new Color(0.1f, 0.1f, 0.1f);
         mr.materials[1].color = new Color(0.3f, 0.3f, 0.3f);
-        mr.materials[2].color = new Color(0.1f, 0.4f, 0.8f);
+        mr.materials[0].color = new Color(0.1f, 0.4f, 0.8f);
 
         LED = transform.Find("Lights").GetComponent<MeshRenderer>();
         LED.materials[0].color = new Color(0.3f, 0.3f, 0.3f);
@@ -696,11 +699,13 @@ public class EvilMemory : MonoBehaviour
                 LEDDials[0].gameObject.transform.localScale = new Vector3(2.25f,2.25f,2.25f);
                 LEDDials[1].gameObject.transform.localScale = new Vector3(2.25f,2.25f,2.25f);
                 LEDDials[2].gameObject.transform.localScale = new Vector3(2.25f,2.25f,2.25f);
+                LED.GetComponent<MeshFilter>().mesh = ColourblindMesh;
             }
             else {
                 LEDDials[0].gameObject.transform.localScale = new Vector3(0,0,0);
                 LEDDials[1].gameObject.transform.localScale = new Vector3(0,0,0);
                 LEDDials[2].gameObject.transform.localScale = new Vector3(0,0,0);
+                LED.GetComponent<MeshFilter>().mesh = StandardMesh;
             }
         }
         if(cmd.Equals("advance") || cmd.Equals("next")) {
