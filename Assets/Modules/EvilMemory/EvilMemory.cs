@@ -17,14 +17,6 @@ public class EvilMemory : MonoBehaviour
     //How many unique colours to create for the flashing "free stage check" LED
     private const int STAGE_CHECK_FIDELITY = 25;
 
-    //Config stuff
-    private bool highVisDials = false;        // If true, dials are white on black
-    private float scaleFactor = 1;            // Scaling of dials
-    private bool advanceWithKey = false;      // If true, stage repeating advances on submit instead of per 4s
-    private bool reverseDialControls = false; // If true, flips dial controls
-    private int stageRandomForward  = 10;     // How many solves ahead a stage can appear (solve 20 can appear as late as 30)
-    private int stageRandomBackward = 5;      // How many solves behind a stage can appear (solve 20 can appear as early as 15)
-
     public static string[] ignoredModules = null;
 
     private static Color LED_OFF = new Color(0, 0, 0, 0);
@@ -61,49 +53,40 @@ public class EvilMemory : MonoBehaviour
     private int[]  NixieDisplay;
     private int[][]  LEDDisplay;
 
+    private EvilFMNSettings SettingData;
     public class EvilFMNSettings {
-        public bool highVis;
-        public float scale;
-        public bool advanceWithKey;
-        public bool reverseDialControls;
-        public int stageRandomForward;
-        public int stageRandomBackward;
+        public bool highVis = false;             // If true, dials are white on black
+        public float scale = 1;                  // Scaling of dials
+        public bool advanceWithKey = false;      // If true, stage repeating advances on submit instead of per 4s
+        public bool reverseDialControls = false; // If true, flips dial controls
+        public int stageRandomForward = 10;      // How many solves ahead a stage can appear (solve 20 can appear as late as 30)
+        public int stageRandomBackward = 5;      // How many solves behind a stage can appear (solve 20 can appear as early as 15)
     }
 
+    private static bool VALIDATED = false;
     void DoSettings() {
-        EvilFMNSettings set = JsonUtility.FromJson<EvilFMNSettings>(Settings.Settings);
-        if(set == null || set.scale <= 0) {
-            set = new EvilFMNSettings();
-            set.scale = 1;
-            set.stageRandomForward = 10;
-            set.stageRandomBackward = 5;
-            Settings.Settings = JsonUtility.ToJson(set, true);
-        }
-        else {
-            highVisDials = set.highVis;
-            scaleFactor = set.scale;
-            advanceWithKey = set.advanceWithKey;
-            reverseDialControls = set.reverseDialControls;
-            stageRandomForward = set.stageRandomForward;
-            stageRandomBackward = set.stageRandomBackward;
-            if (stageRandomForward == 0 && stageRandomBackward == 0) {
-                stageRandomForward = 10;
-                stageRandomBackward = 10;
-                Settings.Settings = JsonUtility.ToJson(set, true);
-            }
-            if (stageRandomForward < 0) stageRandomForward = 0;
-            if (stageRandomBackward < 0) stageRandomBackward = 0;
+        SettingData = new EvilFMNSettings();
+        JsonUtility.FromJsonOverwrite(Settings.Settings, SettingData);
+        if (!VALIDATED && Settings.SettingsPath.Trim() != "") {
+            Settings.Settings = JsonUtility.ToJson(SettingData, true);
+            // write it
+            string path = Settings.SettingsPath;
+            System.IO.StreamWriter fOut = new System.IO.StreamWriter(path, false);
+            fOut.Write(Settings.Settings);
+            fOut.Flush();
+            fOut.Close();
+            VALIDATED = true;
         }
 
-        if(scaleFactor != 2) {
+        if(SettingData.scale != 2) {
             Transform tr = transform.Find("Dial Container").transform;
-            float realScalar = scaleFactor; //temporary to allow manipulating it
+            float realScalar = SettingData.scale; //temporary to allow manipulating it
             tr.localScale *= realScalar;
             realScalar--;
             tr.localPosition = new Vector3(tr.localPosition.x - realScalar * 0.065f, tr.localPosition.y, tr.localPosition.z);
         }
 
-        if(highVisDials) {
+        if(SettingData.highVis) {
             for(int a = 0; a < 10; a++) {
                 Dials[a].GetComponent<MeshRenderer>().material = HighVisMat;
             }
@@ -118,7 +101,7 @@ public class EvilMemory : MonoBehaviour
             LED.GetComponent<MeshFilter>().mesh = StandardMesh;
         }
         else LED.GetComponent<MeshFilter>().mesh = ColourblindMesh;
-        if(highVisDials) {
+        if(SettingData.highVis) {
             LEDDials[0].GetComponent<MeshRenderer>().material = SmallHighVisMat;
             LEDDials[1].GetComponent<MeshRenderer>().material = SmallHighVisMat;
             LEDDials[2].GetComponent<MeshRenderer>().material = SmallHighVisMat;
@@ -179,7 +162,9 @@ public class EvilMemory : MonoBehaviour
                 "Whiteout"
             });
         }
-        Invoke("DoSettings", 0.1f);
+
+        LED = transform.Find("Lights").GetComponent<MeshRenderer>();
+        DoSettings();
 
         if(LED_INTENSITY == null) {
             LED_INTENSITY = new Color[STAGE_CHECK_FIDELITY];
@@ -199,7 +184,7 @@ public class EvilMemory : MonoBehaviour
 
             int a2 = a;
             Transform o = DialContainer.transform.Find("Dial " + (a+1) + " Increment");
-            if(reverseDialControls) {
+            if(SettingData.reverseDialControls) {
                 o.localPosition = new Vector3(-o.localPosition.x, o.localPosition.y, o.localPosition.z);
                 o.localEulerAngles = new Vector3(-o.localEulerAngles.x, o.localEulerAngles.y, o.localEulerAngles.z);
             }
@@ -208,7 +193,7 @@ public class EvilMemory : MonoBehaviour
                 return false;
             };
             o = DialContainer.transform.Find("Dial " + (a+1) + " Decrement");
-            if(reverseDialControls) {
+            if(SettingData.reverseDialControls) {
                 o.localPosition = new Vector3(-o.localPosition.x, o.localPosition.y, o.localPosition.z);
                 o.localEulerAngles = new Vector3(-o.localEulerAngles.x, o.localEulerAngles.y, o.localEulerAngles.z);
             }
@@ -223,7 +208,6 @@ public class EvilMemory : MonoBehaviour
         mr.materials[1].color = new Color(0.3f, 0.3f, 0.3f);
         mr.materials[0].color = new Color(0.1f, 0.4f, 0.8f);
 
-        LED = transform.Find("Lights").GetComponent<MeshRenderer>();
         LED.materials[0].color = new Color(0.3f, 0.3f, 0.3f);
         LED.materials[1].color = LED_OFF;
         LED.materials[2].color = LED_OFF;
@@ -279,8 +263,8 @@ public class EvilMemory : MonoBehaviour
         int opCount = 1;
         int stageCounter = 1;
         for(int a = 0; a < count; a++) {
-            int min = a-stageRandomForward;
-            List<int> availStages = stages.Where(it => it <= a+stageRandomBackward && it >= a-stageRandomForward).ToList();
+            int min = a-SettingData.stageRandomForward;
+            List<int> availStages = stages.Where(it => it <= a+SettingData.stageRandomBackward && it >= a-SettingData.stageRandomForward).ToList();
             if (availStages.Count == 0) {
                 // This should never happen, but just in case...
                 Debug.Log("[Forget Everything #"+thisLoggingID+"] WARN: Stage " + (a+1).ToString("D2") + " was forced to pick outside the config-specified range!");
@@ -432,7 +416,7 @@ public class EvilMemory : MonoBehaviour
         if(done || StageOrdering == null) return;
         if(displayTimer > 0) displayTimer -= Time.fixedDeltaTime;
 
-        if(displayOverride != -1 && !advanceWithKey) {
+        if(displayOverride != -1 && !SettingData.advanceWithKey) {
             if(displayTimer <= 0) {
                 displayTimer = STAGE_DELAY;
                 displayOverride += 10;
@@ -510,7 +494,7 @@ public class EvilMemory : MonoBehaviour
         Submit.GetComponent<KMSelectable>().AddInteractionPunch(0.5f);
         Sound.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
 
-        if (displayOverride != -1 && advanceWithKey) {
+        if (displayOverride != -1 && SettingData.advanceWithKey) {
             displayOverride += 10;
             if(displayOverride >= StageOrdering.Length) displayOverride = -1;
             return false;
@@ -715,7 +699,7 @@ public class EvilMemory : MonoBehaviour
             }
         }
         if(cmd.Equals("advance") || cmd.Equals("next")) {
-            if (!advanceWithKey) {
+            if (!SettingData.advanceWithKey) {
                 yield return "sendtochaterror Advancing with key is disabled.";
                 yield break;
             }
