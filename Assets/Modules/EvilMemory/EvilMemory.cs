@@ -86,12 +86,6 @@ public class EvilMemory : MonoBehaviour
             tr.localPosition = new Vector3(tr.localPosition.x - realScalar * 0.065f, tr.localPosition.y, tr.localPosition.z);
         }
 
-        if(SettingData.highVis) {
-            for(int a = 0; a < 10; a++) {
-                Dials[a].GetComponent<MeshRenderer>().material = HighVisMat;
-            }
-        }
-
         KMColorblindMode cb = GetComponent<KMColorblindMode>();
         if (cb != null && !cb.ColorblindModeActive) {
             // is this bad?
@@ -181,6 +175,8 @@ public class EvilMemory : MonoBehaviour
             Dials[a] = DialContainer.transform.Find("Dial " + (a+1)).gameObject;
             DialLED[a] = DialContainer.transform.Find("Dial LED " + (a+1)).GetComponent<MeshRenderer>();
             DialLED[a].material.color = LED_OFF;
+
+            if(SettingData.highVis) Dials[a].GetComponent<MeshRenderer>().material = HighVisMat;
 
             int a2 = a;
             Transform o = DialContainer.transform.Find("Dial " + (a+1) + " Increment");
