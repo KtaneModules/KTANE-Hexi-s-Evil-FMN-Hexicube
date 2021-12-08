@@ -66,17 +66,20 @@ public class EvilMemory : MonoBehaviour
     private static bool VALIDATED = false;
     void DoSettings() {
         SettingData = new EvilFMNSettings();
-        JsonUtility.FromJsonOverwrite(Settings.Settings, SettingData);
-        if (!VALIDATED && Settings.SettingsPath.Trim() != "") {
-            Settings.Settings = JsonUtility.ToJson(SettingData, true);
-            // write it
+        if (Settings.SettingsPath.Trim() != "") {
             string path = Settings.SettingsPath;
-            System.IO.StreamWriter fOut = new System.IO.StreamWriter(path, false);
-            fOut.Write(Settings.Settings);
-            fOut.Flush();
-            fOut.Close();
-            VALIDATED = true;
+            System.IO.StreamReader fIn = new System.IO.StreamReader(path);
+            JsonUtility.FromJsonOverwrite(fIn.ReadToEnd(), SettingData);
+            fIn.Close();
+            if (!VALIDATED) {
+                System.IO.StreamWriter fOut = new System.IO.StreamWriter(path, false);
+                fOut.Write(JsonUtility.ToJson(SettingData, true));
+                fOut.Flush();
+                fOut.Close();
+                VALIDATED = true;
+            }
         }
+        else JsonUtility.FromJsonOverwrite(Settings.Settings, SettingData);
 
         if(SettingData.scale != 2) {
             Transform tr = transform.Find("Dial Container").transform;
